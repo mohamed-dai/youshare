@@ -1,4 +1,5 @@
 import "./styles.css";
+import pixelmatch from "pixelmatch";
 
 const videoElem = document.getElementById("video");
 const startElem = document.getElementById("start");
@@ -49,7 +50,7 @@ async function startCapture() {
   }
 }
 
-const width = 1200; // We will scale the photo width to this
+const width = 250; // We will scale the photo width to this
 let height = 0; // This will be computed based on the input stream
 let streaming = false;
 
@@ -95,8 +96,8 @@ function takepicture() {
   }
 }
 
-function takeManyPicture() {
-  const context = canvas.getContext("2d");
+function takeManyPicture(now, metadata) {
+  const context = canvas.getContext("2d", { willReadFrequently: true });
   if (width && height) {
     canvas.width = width;
     canvas.height = height;
@@ -115,15 +116,18 @@ function takeManyPicture() {
       null,
       data.width,
       data.height,
-      { threshold: 0.1 }
+      { threshold: 0.5 }
     );
     previousPhoto = data;
-    console.log("diff", diff);
-    if (diff > 400) {
+    // console.log("diff", diff);
+    if (diff > 400 && metadata.mediaTime > 0) {
+      // console.log("new image " + Date());
+
       const src = canvas.toDataURL("image/png");
       let photo = document.createElement("IMG");
       photo.setAttribute("src", src);
       output.appendChild(photo);
+      // console.log(now, metadata.mediaTime);
     }
   } else {
     // clearphoto();
